@@ -1,0 +1,70 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger only when pushing tags like v1.0.0
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build executable with PyInstaller
+        run: |
+          pyinstaller --onefile --noconsole game.py
+
+      - name: Rename and move binary
+        run: |
+          mkdir -p release
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            mv dist/game release/flappy-linux
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            mv dist/game.exe release/flappy-windows.exe
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            mv dist/game release/flappy-macos
+          fi
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flappy-${{ matrix.os }}
+          path: release/*
+
+  release:
+    name: Publish Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloads
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: |
+            downloads/**/*
