@@ -29,20 +29,29 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller --onefile --noconsole main.py
+          mkdir -p dist
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            pyinstaller --onefile --noconsole --add-data "assets;assets" main.py
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            pyinstaller --onefile --windowed --add-data "assets:assets" main.py
+          else
+            pyinstaller --onefile --windowed --add-data "assets:assets" main.py
+          fi
+        shell: bash
 
       - name: Debug dist contents
         run: ls -R dist
+        shell: bash
 
       - name: Rename and move binary
         run: |
           mkdir -p release
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            mv dist/main release/space-shooter-linux
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             mv dist/main.exe release/space-shooter-windows.exe
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             mv dist/main release/space-shooter-macos
+          else
+            mv dist/main release/space-shooter-linux
           fi
         shell: bash
 
@@ -69,5 +78,4 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          files: |
-            downloads/**/*
+          files: downloads/**/*
