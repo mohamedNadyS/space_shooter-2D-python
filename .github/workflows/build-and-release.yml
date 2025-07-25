@@ -31,22 +31,25 @@ jobs:
         run: |
           pyinstaller --onefile --noconsole main.py
 
+      - name: Debug dist contents
+        run: ls -R dist
+
       - name: Rename and move binary
         run: |
           mkdir -p release
           if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            mv dist/game release/flappy-linux
+            mv dist/main release/space-shooter-linux
           elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mv dist/game.exe release/flappy-windows.exe
+            mv dist/main.exe release/space-shooter-windows.exe
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            mv dist/game release/flappy-macos
+            mv dist/main release/space-shooter-macos
           fi
         shell: bash
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: flappy-${{ matrix.os }}
+          name: space-shooter-${{ matrix.os }}
           path: release/*
 
   release:
