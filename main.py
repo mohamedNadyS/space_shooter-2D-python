@@ -3,7 +3,22 @@ import sys
 import random
 import os
 from pygame.locals import *
-import time
+import json
+
+highscore_file = 'high_score.json'
+
+def load_high_score():
+    if os.path.exists(highscore_file):
+        with open(highscore_file,'r')as f:
+            return json.load(f)["high_scores"]
+    return []
+
+def save_high_score(high_scores):
+    with open(highscore_file, 'w') as f:
+        json.dump({"high_scores": high_scores}, f, indent=2)
+
+high_scores = load_high_score()
+
 pygame.init()
 screen = pygame.display.set_mode((800,600))
 clock = pygame.time.Clock()
@@ -17,6 +32,8 @@ pygame.display.set_caption("Space Shooter")
 passed_aliens = 0
 typingName = False
 high_score = {'high score': 0, 'name': 'Player'}
+if high_scores:
+    high_score = high_scores[0]
 class player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -92,6 +109,11 @@ while running:
                     high_score["high score"]=int(highScore)
                     high_score["name"]= player_name_input
                     typingName= False
+                    newEntry = {'high score': highScore, 'name': player_name_input.strip()}
+                    high_scores.append(newEntry)
+                    high_scores = sorted(high_scores,key=lambda x:x['high score'],reverse=True)[:10]
+                    save_high_score(high_scores)
+                    high_score = high_scores[0]
                 elif event.key == K_BACKSPACE:
                     player_name_input = player_name_input[:-1]
                 else:
