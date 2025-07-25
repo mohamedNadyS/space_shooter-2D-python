@@ -5,6 +5,14 @@ import os
 from pygame.locals import *
 import json
 
+def get_assets_path(filename):
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path= os.path.dirname(os.path.abspath(__file__))
+    
+    return os.path.join(base_path,'assets', filename)
+
 highscore_file = 'high_score.json'
 
 def load_high_score():
@@ -22,12 +30,12 @@ high_scores = load_high_score()
 pygame.init()
 screen = pygame.display.set_mode((800,600))
 clock = pygame.time.Clock()
-font = pygame.font.Font('assets/ElectronPulseItalic-6YJX1.ttf',40)
+font = pygame.font.Font(get_assets_path('ElectronPulseItalic-6YJX1.ttf'),40)
 score = 0
 player_name_input = ""
-background = pygame.image.load('assets/darkPurple.png')
+background = pygame.image.load(get_assets_path('darkPurple.png'))
 background = pygame.transform.scale(background,(800,800))
-laser_sound = pygame.mixer.Sound('assets/sfx_laser1.ogg')
+laser_sound = pygame.mixer.Sound(get_assets_path('sfx_laser1.ogg'))
 pygame.display.set_caption("Space Shooter")
 passed_aliens = 0
 typingName = False
@@ -37,7 +45,7 @@ if high_scores:
 class player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('assets/BAOyZX.png')
+        self.image = pygame.image.load(get_assets_path('BAOyZX.png'))
         self.image = pygame.transform.scale(self.image,(60,60))
         self.rect = self.image.get_rect(center=(400,500))
         self.speed = 6
@@ -58,9 +66,9 @@ class player(pygame.sprite.Sprite):
 class alien(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image1 = pygame.image.load('assets/matt-smith-boss.gif')
+        self.image1 = pygame.image.load(get_assets_path('matt-smith-boss.gif'))
         self.image1 = pygame.transform.scale(self.image1,(68,68))
-        self.image2 = pygame.image.load('assets/matt-smith-enemy.gif')
+        self.image2 = pygame.image.load(get_assets_path('matt-smith-enemy.gif'))
         self.image2 = pygame.transform.scale(self.image2,(60,60))
         if random.randint(0,1)==0:
             self.image = self.image1
@@ -79,7 +87,7 @@ class alien(pygame.sprite.Sprite):
 class laser(pygame.sprite.Sprite):
     def __init__(self,x,y):
         super().__init__()
-        self.image = pygame.image.load('assets/laserBlue07.png')
+        self.image = pygame.image.load(get_assets_path('laserBlue07.png'))
         self.rect = self.image.get_rect(center=(x,y))
         self.speed = -15
     def update(self):

@@ -27,17 +27,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install pygame pyinstaller
 
+      - name: Debug assets folder
+        run: |
+          echo "Contents of assets folder:"
+          ls -la assets/ || echo "Assets folder not found"
+        shell: bash
+
       - name: Build executable with PyInstaller
         run: |
           mkdir -p dist
           if [ "${{ runner.os }}" == "Windows" ]; then
-            pyinstaller --onefile --noconsole --add-data "assets;assets" main.py
+            pyinstaller --onefile --noconsole --add-data "assets/*;assets/" main.py
             mv dist/main.exe dist/space-shooter-windows.exe
           elif [ "${{ runner.os }}" == "macOS" ]; then
-            pyinstaller --onefile --windowed --add-data "assets:assets" main.py
+            pyinstaller --onefile --windowed --add-data "assets/*:assets/" main.py
             mv dist/main dist/space-shooter-macos
           else
-            pyinstaller --onefile --windowed --add-data "assets:assets" main.py
+            pyinstaller --onefile --windowed --add-data "assets/*:assets/" main.py
             mv dist/main dist/space-shooter-linux
           fi
         shell: bash
